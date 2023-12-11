@@ -1,0 +1,44 @@
+{
+    "tag": "concat/dual_cg_64.128_6.2",
+    "train_data": "./data/fpolymers_221123.train.csv",
+    "test_data": "./data/fpolymers_221123.test.csv",
+    "output_path": "/home/jhyang/WORKSPACES/MODELS/fpoly/r100/finetune_gs/b32_g80_s300",
+    "pretrained_path": "/home/jhyang/WORKSPACES/MODELS/fpoly/r100/encoders_cs/concat/cg_64.128_6.2",
+    "pretrained_model": "00500.model.torch",
+    "target_column": [
+        "TG"
+    ],
+    "overwrite": false,
+    "from_scratch": false,
+    "pretrained_encoder_only": true,
+    "random_state": 100,
+    "normalize_feature": true,
+    "normalize_target ": true,
+    "target_noise": 0,
+    "train_ratio": null,
+    "cross_valid": true,
+    "num_fold": 5,
+    "epochs": 300,
+    "batch_size": 32,
+    "learning_rate": 0.002,
+    "logging_interval": 100,
+    "scheduler_step_size": 300,
+    "scheduler_gamma": 0.8,
+    "encoder_type": "concat",
+    "encoder_share": false,
+    "graph_net_params": {
+        "hidden_dim": 64,
+        "output_dim": 32,
+        "n_layer": 6,
+        "graph": "cg"
+    },
+    "mol_net_params": {
+        "hidden_dim": 128,
+        "output_dim": 32,
+        "n_layer": 2
+    },
+    "decoder_params": {
+        "hidden_dim": 32,
+        "n_layer": 2
+    }
+}

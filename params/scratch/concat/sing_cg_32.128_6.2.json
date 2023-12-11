@@ -1,0 +1,16 @@
+{
+    "tag": "sing_cg_32.128_6.2",
+    "encoder_type": "concat",
+    "encoder_share": true,
+    "graph_net_params": {
+        "graph": "cg",
+        "hidden_dim": 32,
+        "output_dim": 32,
+        "n_layer": 6
+    },
+    "mol_net_params": {
+        "hidden_dim": 128,
+        "output_dim": 32,
+        "n_layer": 2
+    }
+}

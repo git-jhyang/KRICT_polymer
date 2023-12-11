@@ -1,0 +1,48 @@
+{
+    "tag": "concat/tf/default",
+    "train_data": "./data/fpolymers_221123.train.csv",
+    "test_data": "./data/fpolymers_221123.test.csv",
+    "output_path": "/home/jhyang/WORKSPACES/MODELS/fpoly/r100/cv_5/finetune_e8",
+    "pretrained_path":"/home/jhyang/WORKSPACES/MODELS/fpoly/r100/encoders_8",
+    "pretrained_model":"concat/tf/00500.model.torch",
+    "target_column": ["TG"],
+    "overwrite": false,
+    "from_scratch": false,
+    "pretrained_encoder_only":true,
+    "random_state": 100,
+    
+    "normalize_feature": true,
+    "normalize_target ": true,
+    
+    "train_ratio": null,
+    "cross_valid": true,
+    "num_fold": 5,
+    
+    "epochs": 300,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "logging_interval": 100,
+    "scheduler_step_size": 25,
+    "scheduler_gamma": 0.5,
+    
+    "encoder_type": "concat",
+    "encoder_share": false,
+    
+    "graph_net_params":  {
+        "hidden_dim": 64,
+        "output_dim": 64,
+        "n_layer":2,
+        "graph":"tf"
+    },
+
+    "mol_net_params": {
+        "hidden_dim": 128,
+        "output_dim": 64,
+        "n_layer":1
+    },
+
+    "decoder_params": {
+        "hidden_dim": 128,
+        "n_layer": 2
+    }
+}

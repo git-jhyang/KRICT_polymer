@@ -1,0 +1,9 @@
+{
+    "tag": "dnn_64_1",
+    "encoder_type": "mol",
+    "mol_net_params": {
+        "hidden_dim": 64,
+        "output_dim": 32,
+        "n_layer": 1
+    }
+}

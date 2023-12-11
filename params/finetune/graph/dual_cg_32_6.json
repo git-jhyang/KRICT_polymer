@@ -1,0 +1,12 @@
+{
+    "tag": "dual_cg_32_6",
+    "encoder_type": "graph",
+    "encoder_share": false,
+    "graph_net_params": {
+        "graph": "cg",
+        "hidden_dim": 32,
+        "output_dim": 32,
+        "n_layer": 6
+    },
+    "pretrained_path": "/home/jhyang/WORKSPACES/MODELS/fpoly/r100/encoders_cs/graph/cg_32_6"
+}
