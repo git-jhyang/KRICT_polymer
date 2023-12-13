@@ -1,0 +1,5 @@
+b32_g99_s50_concat_sing_cg_64.256_4.2
+b04_g95_s50_concat_sing_cg_64.128_6.2
+b32_g75_s25_concat_sing_cg_64.128_6.2
+b16_g95_s50_concat_sing_cg_64.128_6.2
+b16_g95_s25_concat_sing_cg_64.256_4.2

@@ -1,0 +1,25 @@
+{
+    "encoder_type": "mol",
+    "encoder_params": {
+        "graph_net_params": {
+            "hidden_dim": 64,
+            "output_dim": 32,
+            "n_layer": 6,
+            "graph": "cg",
+            "node_dim": 26,
+            "edge_dim": 5
+        },
+        "mol_net_params": {
+            "hidden_dim": 128,
+            "output_dim": 32,
+            "n_layer": 2,
+            "input_dim": 399
+        }
+    },
+    "decoder_params": {
+        "hidden_dim": 32,
+        "n_layer": 2,
+        "output_dim": 1,
+        "input_dim": 64
+    }
+}
