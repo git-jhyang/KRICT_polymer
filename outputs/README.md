@@ -1,19 +1,29 @@
 # Baseline models
 svr: Support vector regressor
+
 xgb: xgboost
+
 fp: rdkit fingerprints
+
 gg: graph & global state feature
 
  - files include model hyperparameters
 
 # Neural network models (finetune / scratch)
 Models that exhibit highest R2 scores with given condition are collected
+
 all_ens  : regardless of hyperparameters and input features
+
 gr_ens   : regardless of hyperparameters but only use graph features
+
 gr_hp    : same hyperparameters and use of graph features
+
 grgs_ens : regardless of hyperparameters but use both graph and global state features
+
 grgs_hp  : same hyperparameters and use of both graph and global state features
+
 gs_ens   : regardless of hyperparameters but only use global state features
+
 gs_hp    : same hyperparameters and use of global state features
 
 prefixes:
