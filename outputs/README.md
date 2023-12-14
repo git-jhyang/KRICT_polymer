@@ -15,22 +15,23 @@ Models that exhibit highest R2 scores with given condition are collected
 - gs_ens   : regardless of hyperparameters but only use global state features
 - gs_hp    : same hyperparameters and use of global state features
 
+
 - prefixes:
--- gr: graph
--- gs: global state
--- grgs: graph and global state
+ - gr: graph
+ - gs: global state
+ - grgs: graph and global state
 - suffixes:
--- ens: ensemble regardless of hyperparameter, individual R2 score
--- hp: same hyperparameter, average of R2 score
+ - ens: ensemble regardless of hyperparameter, individual R2 score
+ - hp: same hyperparameter, average of R2 score
 
 ## file description
-tuning_hp.txt : abstract hyperparameter information
+- tuning_hp.txt : abstract hyperparameter information
 
-prefix: 
-    fold_N : results from N-th fold
-suffixes:
-    loss.txt    : train and validation loss
-    model.torch : pytorch model
-    param.json  : model hyperparameter
-    params.txt  : final learning rate and score
-    scale.json  : target scaling factors
+- prefix: 
+ - fold_N : results from N-th fold
+- suffixes:
+ - loss.txt    : train and validation loss
+ - model.torch : pytorch model
+ - param.json  : model hyperparameter
+ - params.txt  : final learning rate and score
+ - scale.json  : target scaling factors
