@@ -358,6 +358,71 @@ class FPolyDatasetV2(BaseDataset):
             self.save(self._cache_fn, overwrite=overwrite)
             self._data = to_tensor(self._data)
 
+class FPolyDatasetV3(BaseDataset):
+    # directly generate from pandas dataframe without cache file generation
+    def __init__(self, norm=True, **kwargs):
+        super(FPolyDatasetV3, self).__init__(norm=norm, **kwargs)
+
+    def generate(self,
+                 df: pd.DataFrame,
+                 col_id:str = 'ID',
+                 col_smiles:Union[List[str], str] = [f'SMILES_{x}' for x in 'ABCDE'],
+                 col_weights:Union[List[str], str] = [f'FR_{x}' for x in 'ABCDE'],
+                 col_target:Union[List[str], str] = ['TG'],
+                 **kwargs):
+
+        col_target = col_target if isinstance(col_target, List) else [col_target]
+        self._target_desc = col_target
+        
+        df = df[np.sum(df[col_target].isna().values.reshape(-1, len(col_target)), axis=1) == 0]
+        smiles = df[col_smiles]
+        smiles = sorted(set(np.hstack(smiles.values[~smiles.isna()])))
+        
+        self._generate(smiles=smiles)
+        
+        pbar = None
+        if df.shape[0] > 5000:
+            pbar = tqdm.tqdm(desc='Parsing data', total=df.shape[0])
+
+        keydata = {d['smiles']:d for d in self._data}
+        data = []
+        for _, datarow in df.iterrows():
+            id = datarow[col_id]
+            weights = datarow[col_weights]
+            m  = ~ (weights.isna() | (weights == 0))
+            smiles = datarow[col_smiles].values[m]
+            weights = torch.tensor(weights.values[m].astype(float)).float().view(-1)
+            target = torch.tensor(datarow[col_target]).view(1,-1).float()
+            w_sum = weights.sum()
+            f, c = [], []
+            empty_data = self.empty_data.copy()
+            empty_data.update({'id':id, 'target':target})
+            for s, w in zip(smiles, weights):
+                data_dict = keydata[s].copy()
+                data_dict.update({
+                    'id':id,
+                    'weight':(w/w_sum).view(1,1).float(),
+                    'target':target
+                })
+                if 'F' in s:
+                    f.append(data_dict)
+                else:
+                    c.append(data_dict)
+            if len(f) == 0:
+                f.append(empty_data)
+            if len(c) == 0:
+                c.append(empty_data)
+            feat_f, _, _ = basic_collate_fn(f)
+            feat_c, _, _ = basic_collate_fn(c)
+            feat_f.update({'id':id, 'target':target, 'smiles':[s for s in smiles if 'F' in s]})
+            feat_c.update({'id':id, 'target':target, 'smiles':[s for s in smiles if 'F' not in s]})
+            data.append([feat_f, feat_c])
+            if pbar is not None:
+                pbar.update(1)
+        self._unique_data = to_numpy(np.array(self._data))
+        self._data = np.array(data)
+        self._data = to_tensor(self._data)
+
 def PolyData(id, smiles, atom_feat, bond_feat, bond_idx, mol_feat, graph_idx, 
              target, weight=torch.ones((1,1)).float()):
         return {
