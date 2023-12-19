@@ -1,5 +1,0 @@
-b32_g95_s25_graph_sing_cg_64_4
-b08_g99_s50_graph_sing_cg_64_6
-b04_g75_s25_graph_sing_cg_64_6
-b08_g99_s50_graph_sing_cg_64_4
-b08_g99_s50_graph_sing_cg_64_4

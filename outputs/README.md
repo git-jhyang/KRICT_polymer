@@ -27,11 +27,15 @@ Models that exhibit highest R2 scores with given condition are collected
 ## File descriptions
 - tuning_hp.txt : abstract hyperparameter information
 
-- prefix: 
+- subdirectories: 
     - fold_N : results from N-th fold
-- suffixes:
+- filenames:
     - loss.txt    : train and validation loss
     - model.torch : pytorch model
     - param.json  : model hyperparameter
     - params.txt  : final learning rate and score
- - scale.json  : target scaling factors
+    - scale.json  : target scaling factors
+    - train.pkl   : training results
+    - valid.pkl   : validation results
+    - test.pkl    : test results
+
