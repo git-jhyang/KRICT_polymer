@@ -1,2 +1,3 @@
-# KRI
-predicting properties of copolymers
+# KRICT Polymer
+---------------
+Predicting properties of copolymer using machine learning models
