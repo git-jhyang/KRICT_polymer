@@ -246,12 +246,12 @@ class FPolyDatasetV1(BaseDataset):
             if df.shape[0] > 5000:
                 pbar = tqdm.tqdm(desc='Parsing data', total=df.shape[0])
             for _, datarow in df.iterrows():
-                id = datarow[col_id]
-                weights = datarow[col_weights]
+                id = datarow.loc[col_id]
+                weights = datarow.loc[col_weights]
                 m  = ~weights.isna()
-                smiles = datarow[col_smiles].values[m]
+                smiles = datarow.loc[col_smiles].values[m]
                 weights = torch.tensor(weights.values[m].astype(float)).float().view(-1)
-                target = torch.tensor(datarow[col_target]).view(1,1).float()
+                target = torch.tensor(datarow.loc[col_target].values.astype(float)).view(1,1).float()
                 d = []
                 w_sum = weights.sum()
                 empty_data = self.empty_data.copy()
@@ -321,12 +321,12 @@ class FPolyDatasetV2(BaseDataset):
             keydata = {d['smiles']:d for d in self._data}
             data = []
             for _, datarow in df.iterrows():
-                id = datarow[col_id]
-                weights = datarow[col_weights]
+                id = datarow.loc[col_id]
+                weights = datarow.loc[col_weights]
                 m  = ~ (weights.isna() | (weights == 0))
-                smiles = datarow[col_smiles].values[m]
+                smiles = datarow.loc[col_smiles].values[m]
                 weights = torch.tensor(weights.values[m].astype(float)).float().view(-1)
-                target = torch.tensor(datarow[col_target]).view(1,-1).float()
+                target = torch.tensor(datarow.loc[col_target].values.astype(float)).view(1,-1).float()
                 w_sum = weights.sum()
                 f, c = [], []
                 empty_data = self.empty_data.copy()
@@ -387,12 +387,12 @@ class FPolyDatasetV3(BaseDataset):
         keydata = {d['smiles']:d for d in self._data}
         data = []
         for _, datarow in df.iterrows():
-            id = datarow[col_id]
-            weights = datarow[col_weights]
+            id = datarow.loc[col_id]
+            weights = datarow.loc[col_weights]
             m  = ~ (weights.isna() | (weights == 0))
-            smiles = datarow[col_smiles].values[m]
+            smiles = datarow.loc[col_smiles].values[m]
             weights = torch.tensor(weights.values[m].astype(float)).float().view(-1)
-            target = torch.tensor(datarow[col_target]).view(1,-1).float()
+            target = torch.tensor(datarow.loc[col_target].values.astype(float)).view(1,-1).float()
             w_sum = weights.sum()
             f, c = [], []
             empty_data = self.empty_data.copy()

@@ -67,6 +67,6 @@ for i in range(5):
     tr = Trainer(model, None, scaler)
     ids, pred = tr.predict(DL)
     preds.append(pred)
-
+    
 # final result
 print(np.mean(preds, 0).reshape(-1))
