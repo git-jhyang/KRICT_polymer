@@ -25,13 +25,13 @@ data = [
 ]
 
 # parameters
-device = 'cuda'
+device = 'cpu'
 model_path = [
-    './outputs/finetune/fold_00'
-    './outputs/finetune/fold_01'
-    './outputs/finetune/fold_02'
-    './outputs/finetune/fold_03'
-    './outputs/finetune/fold_04'
+    './outputs/finetune/all_ens/fold_00',
+    './outputs/finetune/all_ens/fold_01',
+    './outputs/finetune/all_ens/fold_02',
+    './outputs/finetune/all_ens/fold_03',
+    './outputs/finetune/all_ens/fold_04',
 ]
 
 # Data part
@@ -57,18 +57,16 @@ DS.to(device)
 DL = DataLoader(DS, batch_size=512, collate_fn=collate_fn)
 
 # loop over models
-preds = [[] for _ in range(5)]
+preds = []
 for i in range(5):
-    model = SingleEncoderModel(**json.load(open(model_path[i], 'param.json')))
+    model = SingleEncoderModel(**json.load(open(os.path.join(model_path[i], 'param.json'))))
     model.load(os.path.join(model_path[i], 'model.torch'), rebuild_model=True)
     model.to(device)
     scaler = DataScaler(device=device)
     scaler.load(model_path[i])
     tr = Trainer(model, None, scaler)
-    for batch in DL:
-        ids, pred = tr.predict(batch)
-        preds[i].append(pred)
-    preds[i] = np.hstack(preds[i])
+    ids, pred = tr.predict(DL)
+    preds.append(pred)
 
 # final result
 print(np.mean(preds, 0).reshape(-1))
