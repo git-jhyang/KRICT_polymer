@@ -5,24 +5,43 @@ from src.model.modules import SingleEncoderModel
 from torch.utils.data import DataLoader
 import pandas as pd
 import numpy as np
-import gc, torch, json, os
+import gc, torch, json, os, argparse, textwrap
 
-# Input part / up to N monomer & feed ratio pairs
-data = [
-    [ # first dataset
-        ['C=C(C(=O)O)C(F)(F)F', 0.2], # first monomer and feed ratio
-        ['CC(=C)C(=O)OC12CC3CC(C1)CC(C3)C2', 0.2], # second monomer and feed ratio
-        ['CC(=C)C(O)=O', 0.2],
-        ['O=C1N(OC(=O)C(=C)C)C(=O)CC1', 0.2],
-        ['CC(=C)C(=O)OCCO', 0.2],
-    ],
-    [ # second dataset
-        ['C=C(C(=O)O)C(F)(F)F', 0.2], # first monomer and feed ratio
-        ['O=C1N(OC(=O)C(=C)C)C(=O)CC1', 0.2], # second monomer and feed ratio
-        ['CC(=C)C(O)=O', 0.4],
-        ['CC(=C)C(=O)OCCO', 0.2],
-    ]
-]
+parser = argparse.ArgumentParser(description=
+        '   This script processes a CSV file containing chemical data of copolymers and predict their glass transition\n'
+        '   temperatures. Input CSV file should contains columns for ID, SMILES strings, and their corresponding ratios.',
+    formatter_class=argparse.RawTextHelpFormatter
+)
+
+parser.add_argument('input_csv', type=str, help=
+        'Path to the input CSV file. The file should contain columns for SMILES strings \n'
+        'and ratio values, with each column labeled using the specified prefixes and suffix.\n\n'
+        'example file format:\n'
+        'ID,sm_1,sm_2,sm_3,sm_4,sm_5,fr_1,fr_2,fr_3,fr_4,fr_5\n'
+        '0,C=C(C(=O)...,CC(=C)C...,CC(=C)C(O)=O,O=C1N(OC...,CC(=C)C...,2,2,2,2,2\n'
+        '1,C=C(C(=O)O)C(F)(F)F,O=C1N(OC...,CC(=C)C(O)=O,CC(=C)C(=O)OCCO,,0.2,0.2,0.4,0.2,\n'
+        '2,C=C(C(=O)O)C(F)(F)F,CC(=C)C(=O)OCCO,,,,10.4,2.5,,,'
+)
+parser.add_argument('--id', default='ID', type=str, help='Data ID column.')
+
+parser.add_argument('--smiles_prefix', default='sm', type=str, help=
+        'Prefix for SMILES columns in the CSV file. Defaults to "sm". This prefix will be \n'
+        'combined with the suffix specified in --suffix to identify SMILES columns. \n'
+        'Example from defaults are sm_1, sm_2, sm_3, etc.'
+)
+parser.add_argument('--ratio_prefix', default='fr', type=str, help=
+        'Prefix for ratio columns in the CSV file. Defaults to "fr". This prefix will be \n'
+        'combined with the suffix specified in --suffix to identify ratio columns. \n'
+        'Example from defaults are fr_1, fr_2, fr_3, etc.'
+)
+parser.add_argument('--suffix', default='12345', type=str, help=
+        'Suffix to be added to the SMILES and ratio prefixes for identifying relevant \n'
+        'columns in the CSV file, based on each individual character in the suffix. \n'
+        'Recommand up to five character in sequence. \n'
+        'For example, with a suffix "123", it will consider columns like sm_1, sm_2, sm_3.'
+)
+
+args = parser.parse_args()
 
 # parameters
 device = 'cpu'
@@ -35,24 +54,15 @@ model_path = [
 ]
 
 # Data part
-
 gc.collect()
 torch.cuda.empty_cache()
 
-n = np.max([len(l) for l in data])
-for d in data:
-    for _ in range(n-len(d)):
-        d.append([np.nan, np.nan])
-
-df = pd.concat([
-    pd.DataFrame(range(len(data)), columns=['ID']),
-    pd.DataFrame([[_d[0] for _d in d] for d in data], columns=[f'sm_{i}' for i in range(n)]),
-    pd.DataFrame([[_d[1] for _d in d] for d in data], columns=[f'fr_{i}' for i in range(n)])
-], axis=1)
-
 DS = FPolyDatasetV3()
-DS.generate(df, col_id='ID', col_smiles=[f'sm_{i}' for i in range(n)], 
-            col_weights=[f'fr_{i}' for i in range(n)], col_target=['ID'])
+df = pd.read_csv(args.input_csv)
+if args.id not in df.columns:
+    df[args.id] = range(df.shape[0])
+DS.generate(df, col_id=args.id, col_smiles=[f'{args.smiles_prefix}_{x}' for x in args.suffix], 
+            col_weights=[f'{args.ratio_prefix}_{x}' for x in args.suffix], col_target=[args.id])
 DS.to(device)
 DL = DataLoader(DS, batch_size=512, collate_fn=collate_fn)
 
@@ -69,4 +79,5 @@ for i in range(5):
     preds.append(pred)
     
 # final result
-print(np.mean(preds, 0).reshape(-1))
+for i, p in zip(ids.reshape(-1), np.mean(preds, 0).reshape(-1)):
+    print('    ID: {:5s} / Tg: {:8.3f} °C ({:.3f} K)'.format(str(i), p, p))
