@@ -5,7 +5,7 @@ from src.model.modules import SingleEncoderModel
 from torch.utils.data import DataLoader
 import pandas as pd
 import numpy as np
-import gc, torch, json, os, argparse, textwrap
+import gc, torch, json, os, argparse
 
 parser = argparse.ArgumentParser(description=
         '   This script processes a CSV file containing chemical data of copolymers and predict their glass transition\n'
