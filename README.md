@@ -2,4 +2,6 @@
 ------------
 Predicting properties of copolymer using machine learning models
 
-toolkit: glass transition temperature prediction
+tg_prediction.py: Predicting glass transition temperature of copolymer data.
+
+
