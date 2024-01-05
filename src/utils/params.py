@@ -1,12 +1,18 @@
 import torch, os, json
 
 class Parameters:
-    def __init__(self, fn=None, default='defaults.json', root='./params_pt'):
+    def __init__(self, fn=None, default='defaults.json', root=''):
         default = default
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self._load(os.path.join(root, default))
+        if os.path.isfile(default):
+            self._load(default)
+        else:
+            self._load(os.path.join(root, default))
         if fn is not None:
-            self._load(os.path.join(root, fn))
+            if os.path.isfile(fn):
+                self._load(fn)
+            else:
+                self._load(os.path.join(root, fn))
         
     def _load(self, fn):
         with open(fn) as f:
