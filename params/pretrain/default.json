@@ -1,0 +1,48 @@
+{
+    "random_state": 100,
+
+    "tag": "default",
+    "output_path":"/home/jhyang/WORKSPACES/MODELS/fpoly/encoders",
+    "from_scratch": true,
+    "overwrite": false,
+
+    "data_path":"/home/jhyang/WORKSPACES/DATA/molecule/qm9/qm9.csv",
+    "normalize_feature": true,
+    "blacklist":[],
+    "id_column":"id",
+    "smiles_column": ["smiles"],
+    "target_column": ["mu","alpha","homo","lumo","gap","R^2","zpve","Cv","U0_pa","U_pa","H_pa","G_pa"],
+    "target_noise": 0,
+
+    "train_ratio": 0.95,
+    "valid_ratio": 0.03,
+    "cross_valid": true,
+    "num_fold": 5,
+
+    "epochs": 500,
+    "batch_size": 2048,
+    "learning_rate": 1e-2,
+    "logging_interval":10,
+    "scheduler_step_size":50,
+    "scheduler_gamma":0.5,
+
+    "encoder_type": "concat",
+
+    "graph_net_params":  {
+        "hidden_dim": 128,
+        "output_dim": 32,
+        "n_layer":4,
+        "graph":"cg"
+    },
+
+    "mol_net_params": {
+        "hidden_dim": 256,
+        "output_dim": 32,
+        "n_layer":2
+    },
+
+    "decoder_params": {
+        "hidden_dim": 32,
+        "n_layer": 2
+    }
+}

@@ -175,7 +175,7 @@ class DataScaler:
         N = len(data) if index is None else len(index)
         i_cut = int(N * np.clip(cutoff, 0, 0.3))
         _, target, _ = collate_fn(data)
-        target = target.to(self._device)
+        target = target.cpu()
         if index is not None:
             target = target[index]
         self._avg = []
@@ -187,8 +187,8 @@ class DataScaler:
             avg = dat_[(dat_ <= avg_ + div) & (dat_ >= avg_ - div)].mean().unsqueeze(0)
             self._avg.append(avg)
             self._div.append(div)
-        self._avg = torch.concat(self._avg).float()
-        self._div = torch.concat(self._div).float()
+        self._avg = torch.concat(self._avg).float().to(self._device)
+        self._div = torch.concat(self._div).float().to(self._device)
 
     def scale(self, targets):
         targets.to(self._device)
