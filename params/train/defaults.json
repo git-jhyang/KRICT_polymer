@@ -1,0 +1,48 @@
+{
+    "random_state": 100,
+
+    "tag": "default",
+    "output_path": "./outputs/dump",
+    "from_scratch": true,
+    "overwrite": false,
+
+    "train_data": "./data/fpolymers_230823.tg.train.csv",
+    "test_data": "./data/fpolymers_230823.tg.test.csv",
+    "normalize_feature": true,
+    "blacklist": [],
+    "id_column": "ID",
+    "smiles_column": ["SMILES_A","SMILES_B","SMILES_C","SMILES_D","SMILES_E"],
+    "weights_column": ["FR_A","FR_B","FR_C","FR_D","FR_E"],
+    "target_column": ["TG"],
+    "target_noise": 0,
+    
+    "train_ratio": null,
+    "cross_valid": true,
+    "num_fold": 5,
+
+    "epochs": 300,
+    "batch_size": 4,
+    "learning_rate": 1e-4,
+    "logging_interval": 5,
+    "save_interval": 100,
+    "scheduler_step_size": 50,
+    "scheduler_gamma": 0.75,
+    
+    "encoder_type": "concat",
+
+    "graph_net_params": {
+        "hidden_dim": 64,
+        "output_dim": 32,
+        "n_layer": 6,
+        "graph": "cg"
+    },
+    "mol_net_params": {
+        "hidden_dim": 128,
+        "output_dim": 32,
+        "n_layer": 2
+    },
+    "decoder_params": {
+        "hidden_dim": 32,
+        "n_layer": 2
+    }
+}

@@ -1,12 +1,12 @@
 {
     "random_state": 100,
 
-    "tag": "default",
-    "output_path":"/home/jhyang/WORKSPACES/MODELS/fpoly/encoders",
+    "tag": "pretrain_default",
+    "output_path":"./outputs/dump",
     "from_scratch": true,
     "overwrite": false,
 
-    "data_path":"/home/jhyang/WORKSPACES/DATA/molecule/qm9/qm9.csv",
+    "data_path":"./data/qm9.csv",
     "normalize_feature": true,
     "blacklist":[],
     "id_column":"id",
@@ -22,7 +22,8 @@
     "epochs": 500,
     "batch_size": 2048,
     "learning_rate": 1e-2,
-    "logging_interval":10,
+    "logging_interval":5,
+    "save_interval":100,
     "scheduler_step_size":50,
     "scheduler_gamma":0.5,
 

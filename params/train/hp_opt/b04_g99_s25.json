@@ -1,0 +1,6 @@
+{
+    "tag": "b04_g99_s25",
+    "batch_size": 4,
+    "scheduler_gamma": 0.99,
+    "scheduler_step_size": 25
+}

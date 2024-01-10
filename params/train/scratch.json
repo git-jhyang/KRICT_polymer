@@ -1,0 +1,5 @@
+{
+    "tag": "scratch",
+    "output_path": "./outputs/dump",
+    "from_scratch": true
+}

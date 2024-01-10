@@ -1,0 +1,6 @@
+{
+    "tag": "b08_g99_s50",
+    "batch_size": 8,
+    "scheduler_gamma": 0.99,
+    "scheduler_step_size": 50
+}

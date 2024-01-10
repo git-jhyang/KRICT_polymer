@@ -1,13 +1,15 @@
 # User created temp files
-/trash/
+dump*
 /params_all/
 log*
 nohup*
 run*
 execute*
-test*
+test_*
 *.pth
 *.pth.bkup
+*.csv
+cache_*
 
 # led / optimized / DLL files
 __pycache__/

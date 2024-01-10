@@ -57,29 +57,25 @@ def set_model(p, dataset, model_desc, train_index=None):
     scheduler = StepLR(optimizer=opt, step_size=p.scheduler_step_size, gamma=p.scheduler_gamma)
     return trainer, scheduler
 
-def save_output(trainer, path, pfx, train_dl, valid_dl=None, test_dl=None):
-    trainer.model.save(path, model=f'{pfx}.model.torch')
-    train_loss, id_train, tgt_train, prd_train = trainer.test(train_dl)
-    train_r2 = [r2_score(t, p) for t,p in zip(tgt_train.T, prd_train.T)]
-    train_mae = [mean_absolute_error(t, p) for t,p in zip(tgt_train.T, prd_train.T)]
-    with open(os.path.join(path, f'{pfx}.train.pkl'), 'wb') as f:
-        pickle.dump([id_train, tgt_train, prd_train], f)
-    output_train = [train_loss, train_r2, train_mae]
-    output_valid = None
-    output_test = None
+def save_output(trainer, writer, pfx, train_dl, valid_dl=None, test_dl=None, logging=False, saving=False):
+    def _save_and_log_(dl, dl_name):
+        loss, ids, tgt, pred = trainer.test(dl)
+        r2s = [r2_score(t, p) for t, p in zip(tgt.T, pred.T)]
+        maes = [mean_absolute_error(t, p) for t, p in zip(tgt.T, pred.T)]
+        if logging:
+            dlpfx = dl_name.capitalize()
+            writer.add_scalar(f'{dlpfx}/Loss', loss, logging)
+            for i, (r2, mae) in enumerate(zip(r2s, maes)):
+                writer.add_scalar(f'{dlpfx}/R2_{i}', r2, logging)
+                writer.add_scalar(f'{dlpfx}/MAE_{i}', mae, logging)
+        if saving:
+            with open(os.path.join(log_dir, f'{pfx}.{dl_name.lower()}.pkl'),'wb') as f:
+                pickle.dump([ids, tgt, pred])
+    
+    log_dir = writer.log_dir
+    trainer.model.save(log_dir, model=f'{pfx}.model.torch')
+    _save_and_log_(train_dl, 'train')
     if valid_dl is not None:
-        valid_loss, id_valid, tgt_valid, prd_valid = trainer.test(valid_dl)
-        valid_r2 = [r2_score(t, p) for t,p in zip(tgt_valid.T, prd_valid.T)]
-        valid_mae = [mean_absolute_error(t, p) for t,p in zip(tgt_valid.T, prd_valid.T)]
-        with open(os.path.join(path, f'{pfx}.valid.pkl'), 'wb') as f:
-            pickle.dump([id_valid, tgt_valid, prd_valid], f)
-        output_valid = [valid_loss, valid_r2, valid_mae]
+        _save_and_log_(valid_dl, 'valid')
     if test_dl is not None:
-        test_loss, id_test, tgt_test, prd_test = trainer.test(test_dl)
-        test_r2 = [r2_score(t, p) for t,p in zip(tgt_test.T, prd_test.T)]
-        test_mae = [mean_absolute_error(t, p) for t,p in zip(tgt_test.T, prd_test.T)]
-        with open(os.path.join(path, f'{pfx}.test.pkl'), 'wb') as f:
-            pickle.dump([id_test, tgt_test, prd_test], f)
-        output_test = [test_loss, test_r2, test_mae]
-    return output_train, output_valid, output_test
-
+        _save_and_log_(test_dl, 'test')

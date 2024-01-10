@@ -8,10 +8,11 @@ from typing import List, Union
 from abc import abstractmethod
 
 class BaseDataset(Dataset):
-    def __init__(self, norm=True, blacklist=[], **kwargs):
+    def __init__(self, norm=True, blacklist=[], verbose=False, **kwargs):
         super(BaseDataset, self).__init__()
         self._norm = norm        
         self._blacklist = blacklist
+        self._verbose = verbose
         if isinstance(blacklist, str) and blacklist.endswith('.json'):
             if os.path.isfile(blacklist):
                 self._blacklist = json.load(open(blacklist))
@@ -81,7 +82,7 @@ class BaseDataset(Dataset):
             if hasattr(self, '_RDGD'): del self._RDGD
             pickle.dump(self.__dict__, f)
 
-    def load(self, path, device='cpu', verbose=True):
+    def load(self, path, device='cpu'):
         with open(path, 'rb') as f:
             d = pickle.load(f)
         if '_blacklist' in d.keys():
@@ -90,7 +91,7 @@ class BaseDataset(Dataset):
             blacklist = []
         cls = BaseDataset(norm=d['_norm'], blacklist=blacklist)
         for k, v in d.items():
-            if verbose:
+            if self._verbose:
                 if hasattr(self, k) and getattr(self, k) is not None:
                     print(f'  Overwriting attribute : {k[1:]}')
                 elif not hasattr(self, k):
@@ -105,9 +106,11 @@ class BaseDataset(Dataset):
         if target is None: target = np.zeros(len(smiles))
         if ids is None: ids = np.arange(len(smiles))
         pbar = None
-        if len(smiles) > 5000:
+        if self._verbose:
             pbar = tqdm.tqdm(desc='Generate data', total=len(smiles))
         for i, s, t in zip(ids, smiles, target):
+            if self._verbose:
+                pbar.update(1)
             m = Chem.MolFromSmiles(s)
             mol_feat = self._RDMD.get(m)
             atom_feat, bond_feat, bond_idx = self._RDGD.get(m)
@@ -168,7 +171,7 @@ class QM9Dataset(BaseDataset):
                  col_target:Union[List[str], str] = [
                      'mu','alpha','homo','lumo','gap','R^2',
                      'zpve','Cv','U0_pa','U_pa','H_pa','G_pa'],
-                 overwrite=False,
+                 overwrite=False, 
                  **kwargs):
 
         col_target = col_target if isinstance(col_target, List) else [col_target]

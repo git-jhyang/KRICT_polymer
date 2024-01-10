@@ -1,0 +1,6 @@
+{
+    "tag": "b16_g75_s25",
+    "batch_size": 16,
+    "scheduler_gamma": 0.75,
+    "scheduler_step_size": 25
+}
