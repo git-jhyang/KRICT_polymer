@@ -108,7 +108,6 @@ def optimization_function(lr):
     num_iter += 1
     return score
 
-
 def main(args):
     global num_iter, max_score, p, model_desc
     global train_idx, valid_dl, train_ds, test_dl
