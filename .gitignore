@@ -1,4 +1,4 @@
-# User created temp files
+# User created files
 dump*
 /params_all/
 log*
@@ -9,8 +9,9 @@ test_*
 test.*
 *.pth
 *.pth.bkup
-*.csv
-cache_*
+/data/qm9.csv
+/data/fpolymers*
+/data/cache_*
 
 # led / optimized / DLL files
 __pycache__/

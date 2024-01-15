@@ -17,28 +17,28 @@ parser.add_argument('input_csv', type=str, help=
         'Path to the input CSV file. The file should contain columns for SMILES strings \n'
         'and ratio values, with each column labeled using the specified prefixes and suffix.\n\n'
         'example file format:\n'
-        'ID,sm_1,sm_2,sm_3,sm_4,sm_5,fr_1,fr_2,fr_3,fr_4,fr_5\n'
+        'ID,SMILES_A,SMILES_B,SMILES_C,SMILES_D,SMILES_E,FR_A,FR_B,FR_C,FR_D,FR_E\n'
         '0,C=C(C(=O)...,CC(=C)C...,CC(=C)C(O)=O,O=C1N(OC...,CC(=C)C...,2,2,2,2,2\n'
         '1,C=C(C(=O)O)C(F)(F)F,O=C1N(OC...,CC(=C)C(O)=O,CC(=C)C(=O)OCCO,,0.2,0.2,0.4,0.2,\n'
         '2,C=C(C(=O)O)C(F)(F)F,CC(=C)C(=O)OCCO,,,,10.4,2.5,,,'
 )
 parser.add_argument('--id', default='ID', type=str, help='Data ID column.')
 
-parser.add_argument('--smiles_prefix', default='sm', type=str, help=
+parser.add_argument('--smiles_prefix', default='SMILES', type=str, help=
         'Prefix for SMILES columns in the CSV file. Defaults to "sm". This prefix will be \n'
         'combined with the suffix specified in --suffix to identify SMILES columns. \n'
-        'Example from defaults are sm_1, sm_2, sm_3, etc.'
+        'Example from defaults are SMILES_A, SMILES_B, SMILES_C, etc.'
 )
-parser.add_argument('--ratio_prefix', default='fr', type=str, help=
+parser.add_argument('--ratio_prefix', default='FR', type=str, help=
         'Prefix for ratio columns in the CSV file. Defaults to "fr". This prefix will be \n'
         'combined with the suffix specified in --suffix to identify ratio columns. \n'
-        'Example from defaults are fr_1, fr_2, fr_3, etc.'
+        'Example from defaults are FR_A, FR_B, FR_C, etc.'
 )
-parser.add_argument('--suffix', default='12345', type=str, help=
+parser.add_argument('--suffix', default='ABCDE', type=str, help=
         'Suffix to be added to the SMILES and ratio prefixes for identifying relevant \n'
         'columns in the CSV file, based on each individual character in the suffix. \n'
         'Recommand up to five character in sequence. \n'
-        'For example, with a suffix "123", it will consider columns like sm_1, sm_2, sm_3.'
+        'For example, with a suffix "ABC", it will consider columns like SMILES_A, SMILES_B, SMILES_C.'
 )
 
 args = parser.parse_args()
@@ -61,6 +61,7 @@ ds = FPolyDatasetV3()
 df = pd.read_csv(args.input_csv)
 if args.id not in df.columns:
     df[args.id] = range(df.shape[0])
+
 ds.generate(df, col_id=args.id, col_smiles=[f'{args.smiles_prefix}_{x}' for x in args.suffix], 
             col_weights=[f'{args.ratio_prefix}_{x}' for x in args.suffix], col_target=[args.id])
 ds.to(device)
@@ -80,4 +81,4 @@ for i in range(5):
     
 # final result
 for i, p in zip(ids.reshape(-1), np.mean(preds, 0).reshape(-1)):
-    print('    ID: {:5s} / Tg: {:8.3f} °C ({:.3f} K)'.format(str(i), p, p))
+    print('    ID: {:5s} / Tg: {:8.3f} °C ({:.3f} K)'.format(str(i), p, p+273.15))
