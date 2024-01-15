@@ -6,6 +6,7 @@ nohup*
 run*
 execute*
 test_*
+test.*
 *.pth
 *.pth.bkup
 *.csv

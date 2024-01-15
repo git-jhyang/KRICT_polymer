@@ -1,11 +1,10 @@
 from src.utils.data import CrossValidation, train_test_split
 from src.utils.dataset import QM9Dataset, collate_fn
 from src.utils.params import Parameters
-from src.utils.functions import set_model, save_output
+from src.utils.functions import set_model, save_output, headers_epoch
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
-import os, pickle, argparse, json
-import numpy as np
+import os, argparse, json
 from torch.utils.tensorboard import SummaryWriter
 
 parser = argparse.ArgumentParser(description=
@@ -66,7 +65,8 @@ def main(args):
         writer = SummaryWriter(model_desc)
         if args.verbose:
             print('Model destination: ', model_desc)
-            print(' Epoch / Train loss / Valid loss')
+            for h in headers_epoch: 
+                print(h)
         if p.cross_valid:
             train_idx, valid_idx = cv[n]
         else:
@@ -76,56 +76,42 @@ def main(args):
         train_dl = DataLoader(data, batch_size=p.batch_size, sampler=SubsetRandomSampler(train_idx), collate_fn=collate_fn)
         valid_dl = DataLoader(data, batch_size=p.batch_size, sampler=valid_idx, collate_fn=collate_fn)
 
-        f = open(os.path.join(model_desc, 'loss.txt'),'w') 
         for epoch in range(1, p.epochs + 1):
-            train_loss = trainer.train(train_dl)
+            _ = trainer.train(train_dl)
             scheduler.step()
             
-            if args.verbose and epoch % p.logging_interval:
-                valid_loss, _, _, _ = trainer.test(valid_dl)
-                print('{:6d} / {:10.6f} / {:10.6f}'.format(epoch, train_loss, valid_loss))
-            if epoch % p.logging_interval == 0:
-                save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, (epoch % p.save_interval == 0))
-            if (epoch % p.save_interval == 0) and (epoch % p.logging_interval != 0):
-                save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, True)
-        if epoch % p.logging_interval != 0:
-            save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, (epoch % p.save_interval != 0))
-        if (epoch % p.save_interval != 0) and (epoch % p.logging_interval == 0):
-            save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, True)
+            if epoch % p.save_interval == 0:
+                save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, True, args.verbose)
+            elif epoch % p.logging_interval == 0:
+                save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, False, args.verbose)
+        if epoch % p.save_interval != 0:
+            save_output(trainer, writer, f'{epoch:05d}', train_dl, valid_dl, None, epoch, True, args.verbose)
 
     # training all data    
     if os.path.isfile(os.path.join(model_root, f'param.json')) and not p.overwrite:
         print('Target directory is not empty. Change \'overwrite = True\' in parameters or change directory. ', model_root)
         exit()
     os.makedirs(model_root, exist_ok=True)
+    writer = SummaryWriter(model_root)
+
     if args.verbose:
         print('Model destination: ', model_root)
-        print(' Epoch / Train loss /  Test loss')
+        for h in headers_epoch: 
+            print(h)
 
     trainer, scheduler = set_model(p, ds, model_desc=model_root)
     train_dl = DataLoader(data, batch_size=p.batch_size, shuffle=True, collate_fn=collate_fn)
 
     for epoch in range(1, p.epochs + 1):
-        loss = []
-        outs = []
-        train_loss = trainer.train(train_dl)
+        _ = trainer.train(train_dl)
         scheduler.step()
-        test_loss, _, _, _ = trainer.test(test_dl)
-        loss.append([epoch, train_loss, test_loss])
-        if epoch % interval == 0:
-            if args.verbose:
-                print('{:6d} / {:10.6f} / {:10.6f}'.format(epoch, train_loss, test_loss))
-        if epoch % p.logging_interval == 0:
-            out = save_output(trainer, model_root, f'{epoch:05d}', train_dl, None, test_dl)
-            outs.append(out)
-    if epoch % p.logging_interval != 0:
-        out = save_output(trainer, model_root, f'{epoch:05d}', train_dl, None, test_dl)
-        outs.append(out)
-    with open(os.path.join(model_root, 'loss.txt'), 'w') as f:
-        for e, t, v in loss:
-            f.write('{:6d} {:10.6f} {:10.6f}\n'.format(e, t, v))
-    with open(os.path.join(model_root, 'outs.pkl'), 'wb') as f:
-        pickle.dump(outs, f)
+
+        if epoch % p.save_interval == 0:
+            save_output(trainer, writer, f'{epoch:05d}', train_dl, None, test_dl, epoch, True, args.verbose)
+        elif epoch % p.logging_interval == 0:
+            save_output(trainer, writer, f'{epoch:05d}', train_dl, None, test_dl, epoch, False, args.verbose)
+    if epoch % p.save_interval != 0:
+        save_output(trainer, writer, f'{epoch:05d}', train_dl, None, test_dl, epoch, True, args.verbose)
 
 if __name__ == '__main__':
     args = parser.parse_args()

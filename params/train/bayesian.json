@@ -1,0 +1,8 @@
+{
+    "tag":"bayes",
+    "bayes_lr_bound":[0.000001, 0.1],
+    "bayes_num_init":5,
+    "bayes_num_iter":20,
+    "bayes_mae_scale":0.02,
+    "bayes_logging_tol":0.9
+}

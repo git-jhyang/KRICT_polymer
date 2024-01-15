@@ -8,6 +8,21 @@ from sklearn.metrics import mean_absolute_error, r2_score
 import torch, gc, os, pickle
 import numpy as np
 
+bar = '-'*110
+headers_epoch = [
+    bar,
+    ' Train | {:^32s} | {:^32s} | {:^32s}'.format('Train','Valid','Test'),
+    ' epoch | {} | {} | {}'.format(*['{:>10s} {:>10s} {:>10s}'.format('Loss','R2','MAE')]*3),
+    bar
+]
+
+headers_bayes = [
+    bar,
+    ' Bayes |   Learning |      Score | {:>21s} | {:>21s} | {:>21s}'.format('Train', 'Valid', 'Test'),
+    '  iter |       rate |            | {} | {} | {}'.format(*['{:>10s} {:>10s}'.format('R2','MAE')]*3),
+    bar,
+]
+
 def init_state(p):
     gc.collect()
     np.random.seed(p.random_state)
@@ -57,7 +72,8 @@ def set_model(p, dataset, model_desc, train_index=None):
     scheduler = StepLR(optimizer=opt, step_size=p.scheduler_step_size, gamma=p.scheduler_gamma)
     return trainer, scheduler
 
-def save_output(trainer, writer, pfx, train_dl, valid_dl=None, test_dl=None, logging=False, saving=False):
+def save_output(trainer, writer, pfx, train_dl, valid_dl=None, test_dl=None, 
+                logging=False, saving=False, verbose=False):
     def _save_and_log_(dl, dl_name):
         loss, ids, tgt, pred = trainer.test(dl)
         r2s = [r2_score(t, p) for t, p in zip(tgt.T, pred.T)]
@@ -70,12 +86,26 @@ def save_output(trainer, writer, pfx, train_dl, valid_dl=None, test_dl=None, log
                 writer.add_scalar(f'{dlpfx}/MAE_{i}', mae, logging)
         if saving:
             with open(os.path.join(log_dir, f'{pfx}.{dl_name.lower()}.pkl'),'wb') as f:
-                pickle.dump([ids, tgt, pred])
+                pickle.dump([ids, tgt, pred], f)
+        return loss, np.mean(r2s), np.mean(maes)
     
     log_dir = writer.log_dir
-    trainer.model.save(log_dir, model=f'{pfx}.model.torch')
-    _save_and_log_(train_dl, 'train')
+    if saving:
+        trainer.model.save(log_dir, model=f'{pfx}.model.torch')
+    out_train = _save_and_log_(train_dl, 'train')
+    out_valid = None
+    out_test = None
     if valid_dl is not None:
-        _save_and_log_(valid_dl, 'valid')
+        out_valid = _save_and_log_(valid_dl, 'valid')
     if test_dl is not None:
-        _save_and_log_(test_dl, 'test')
+        out_test = _save_and_log_(test_dl, 'test')
+    if verbose:
+        s = [f'{logging:6d}']
+        for out in [out_train, out_valid, out_test]:
+            if out is None:
+                s.append(' '*27)
+            else:
+                s.append('{:10.4e} {:10.3e} {:10.4e}'.format(*out))
+        print(' | '.join(s))
+
+    return out_train, out_valid, out_test

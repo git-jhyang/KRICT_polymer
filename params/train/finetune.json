@@ -2,6 +2,7 @@
     "tag": "finetune",
     "output_path": "./outputs/dump",
     "from_scratch": false,
+    "pretrained_encoder_only": true,
     "pretrained_path": "./outputs/pretrain",
     "pretrained_model": "cg_64.128_6.2/model.torch"
 }

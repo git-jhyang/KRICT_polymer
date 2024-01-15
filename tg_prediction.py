@@ -57,14 +57,14 @@ model_path = [
 gc.collect()
 torch.cuda.empty_cache()
 
-DS = FPolyDatasetV3()
+ds = FPolyDatasetV3()
 df = pd.read_csv(args.input_csv)
 if args.id not in df.columns:
     df[args.id] = range(df.shape[0])
-DS.generate(df, col_id=args.id, col_smiles=[f'{args.smiles_prefix}_{x}' for x in args.suffix], 
+ds.generate(df, col_id=args.id, col_smiles=[f'{args.smiles_prefix}_{x}' for x in args.suffix], 
             col_weights=[f'{args.ratio_prefix}_{x}' for x in args.suffix], col_target=[args.id])
-DS.to(device)
-DL = DataLoader(DS, batch_size=512, collate_fn=collate_fn)
+ds.to(device)
+dl = DataLoader(ds, batch_size=512, collate_fn=collate_fn)
 
 # loop over models
 preds = []
@@ -75,7 +75,7 @@ for i in range(5):
     scaler = DataScaler(device=device)
     scaler.load(model_path[i])
     tr = Trainer(model, None, scaler)
-    ids, pred = tr.predict(DL)
+    ids, pred = tr.predict(dl)
     preds.append(pred)
     
 # final result
